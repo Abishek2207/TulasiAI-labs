@@ -1,3 +1,4 @@
+import { AuthChangeEvent, Session } from '@supabase/supabase-js'
 import { supabase } from './supabase'
 import type { Database } from './supabase'
 
@@ -170,7 +171,7 @@ export class AuthService {
   // Listen to auth changes
   onAuthChange(callback: (user: User | null) => void) {
     if (!supabase) return () => {}
-    return supabase.auth.onAuthStateChange(async (_event, session) => {
+    return supabase.auth.onAuthStateChange(async (_event: AuthChangeEvent, session: Session | null) => {
       if (session?.user) {
         const userData = await this.getCurrentUser()
         callback(userData || null)
