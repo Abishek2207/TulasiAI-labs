@@ -69,38 +69,44 @@ class CareerService:
 
     def _generate_career_prediction(self, user_skills: List[str], skill_levels: Dict[str, int], 
                                    profile: Profile, request: CareerPredictionRequest) -> Dict[str, Any]:
-        """Generate career prediction using AI logic"""
+        """
+        Simulates the 'Master Prompt' execution for career strategy.
+        Returns structured results as requested in the final product vision.
+        """
+        # 1. Layoff Risk Calculation
+        has_ai_skills = any(s.lower() in ["ai", "ml", "llm", "generative ai", "openai"] for s in user_skills)
+        risk_level = "Low" if has_ai_skills else "Medium"
+        risk_reason = "Strong relevance in current market due to AI adoption." if has_ai_skills else "Lack of GenAI integration in current tech stack increases redundancy risk."
         
-        # Career matching algorithm
-        suggested_roles = self._match_career_roles(user_skills, skill_levels, profile)
-        
-        # Salary calculation
-        salary_range = self._calculate_salary(user_skills, skill_levels, profile)
-        
-        # Generate roadmap
-        roadmap = self._generate_roadmap(suggested_roles[0]["title"] if suggested_roles else "Developer", user_skills)
-        
-        # Skill gap analysis
-        skill_gap_analysis = self._analyze_skill_gaps(user_skills, suggested_roles[0]["required_skills"] if suggested_roles else [])
-        
-        # Generate insights
-        insights = self._generate_insights(user_skills, profile, suggested_roles)
-        
-        # Calculate confidence score
-        confidence_score = self._calculate_confidence_score(user_skills, skill_levels, profile)
-        
-        # Market trends (mock data - can be enhanced with real API)
-        market_trends = self._get_market_trends()
+        if profile.company and profile.company.lower() in ["google", "meta", "amazon", "microsoft"]:
+            risk_level = "Low"
+            risk_reason = "Stable tier-1 placement, but continuous skill evolution is expected."
+
+        # 2. Market Demand Score
+        demand_score = 85 if has_ai_skills else 65
+
+        # 3. Skill Gap Analysis
+        trending = ["LLM Orchestration", "System Design", "Cloud Native (K8s)", "Vector Databases", "Prompt Engineering"]
+        skill_gaps = [
+            {"skill_name": s, "current_level": 0, "required_level": 3, "gap_description": "Priority market skill", "learning_priority": "high"}
+            for s in trending if s not in user_skills
+        ][:5]
+
+        # 4. Salary Growth Strategy (LPA)
+        current_est = float(profile.salary_range.split('-')[0]) if profile.salary_range and '-' in profile.salary_range else 12.0
+        target_est = current_est * 1.5
 
         return {
-            "suggested_roles": suggested_roles,
-            "salary_range": salary_range,
-            "roadmap": roadmap,
-            "skill_gap_analysis": skill_gap_analysis,
-            "confidence_score": confidence_score,
-            "insights": insights,
-            "market_trends": market_trends,
-            "next_steps": self._generate_next_steps(skill_gap_analysis, suggested_roles[0] if suggested_roles else None)
+            "layoff_risk": {"level": risk_level, "reason": risk_reason},
+            "market_demand_score": demand_score,
+            "skill_gap_analysis": skill_gaps,
+            "suggested_roles": self._match_career_roles(user_skills, skill_levels, profile),
+            "recommended_path": f"Focus on transitioning to {profile.career_goal or 'Senior/Lead'} role by mastering distributed systems and AI integration within 6 months.",
+            "salary_growth_strategy": f"Your target compensation: ₹{current_est}L → ₹{target_est}L. Strategy: Switch to product-heavy startups or FAANG with specialized AI certifications.",
+            "ai_skills_to_learn": ["Claude/OpenAI APIs", "LangChain", "Vector DBs (Pinecone/Weaviate)"],
+            "roadmap": self._generate_roadmap(profile.target_role or "Specialist", user_skills),
+            "confidence_score": 0.88,
+            "market_trends": self._get_market_trends()
         }
 
     def _match_career_roles(self, skills: List[str], skill_levels: Dict[str, int], profile: Profile) -> List[Dict[str, Any]]:

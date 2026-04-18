@@ -4,29 +4,62 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime, timedelta
 from uuid import UUID
 
-from app.models.profile import Profile
-from app.models.skill import Skill
-from app.models.task import Task
-from app.models.streak import Streak
-from app.models.certification import Certification
-from app.schemas.profile import Profile, ProfileCreate, ProfileUpdate, ProfileStats
+from app.models.profile import Profile as ProfileModel
+from app.models.skill import Skill as SkillModel
+from app.models.task import Task as TaskModel
+from app.models.streak import Streak as StreakModel
+from app.models.certification import Certification as CertificationModel
+from app.schemas.profile import Profile as ProfileSchema, ProfileCreate, ProfileUpdate, ProfileStats
 from app.core.exceptions import ProfileException
 
 class ProfileService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def get_user_profile(self, user_id: UUID) -> Profile:
+    async def add_user_profile(self, profile_create: ProfileCreate) -> ProfileSchema:
+        """Create a new user profile"""
+        try:
+            # Check if profile already exists
+            result = await self.db.execute(
+                select(ProfileModel).where(ProfileModel.user_id == profile_create.user_id)
+            )
+            if result.scalar_one_or_none():
+                raise ProfileException("Profile already exists for this user")
+
+            new_profile = ProfileModel(
+                user_id=profile_create.user_id,
+                name=profile_create.name,
+                email=profile_create.email,
+                experience_level=profile_create.experience_level,
+                current_role=profile_create.current_role,
+                target_role=profile_create.target_role,
+                company=profile_create.company,
+                industry=profile_create.industry,
+                salary_range=profile_create.salary_range,
+                career_goal=profile_create.career_goal,
+                daily_learning_hours=profile_create.daily_learning_hours
+            )
+            
+            self.db.add(new_profile)
+            await self.db.commit()
+            await self.db.refresh(new_profile)
+            
+            return await self.get_user_profile(profile_create.user_id)
+        except Exception as e:
+            await self.db.rollback()
+            raise ProfileException(f"Failed to add user profile: {str(e)}")
+
+    async def get_user_profile(self, user_id: UUID) -> ProfileSchema:
         """Get user profile with all related data"""
         try:
             result = await self.db.execute(
-                select(Profile).where(Profile.user_id == user_id)
+                select(ProfileModel).where(ProfileModel.user_id == user_id)
             )
             profile = result.scalar_one_or_none()
             if not profile:
                 raise ProfileException("Profile not found")
             
-            return Profile(
+            return ProfileSchema(
                 id=profile.id,
                 user_id=profile.user_id,
                 name=profile.name,
@@ -35,8 +68,11 @@ class ProfileService:
                 current_role=profile.current_role,
                 target_role=profile.target_role,
                 company=profile.company,
+                industry=profile.industry,
+                salary_range=profile.salary_range,
+                career_goal=profile.career_goal,
                 daily_learning_hours=profile.daily_learning_hours,
-                job_readiness_score=profile.job_readiness_score,
+                job_readiness_score=float(profile.job_readiness_score),
                 created_at=profile.created_at,
                 updated_at=profile.updated_at
             )
@@ -56,8 +92,8 @@ class ProfileService:
             # Update only provided fields
             update_data = profile_update.model_dump(exclude_unset=True)
             await self.db.execute(
-                update(Profile)
-                .where(Profile.user_id == user_id)
+                update(ProfileModel)
+                .where(ProfileModel.user_id == user_id)
                 .values(**update_data)
             )
             await self.db.commit()

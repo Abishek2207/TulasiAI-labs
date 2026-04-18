@@ -1,7 +1,15 @@
 from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from datetime import datetime
+from uuid import UUID
+
+from app.database import get_async_db
+from app.services.profile_service import ProfileService
+from app.services.career_service import CareerService
+from app.services.roadmap_service import RoadmapService
+from app.schemas.career import CareerPredictionRequest
 
 router = APIRouter()
 
@@ -23,26 +31,41 @@ class ProgressUpdate(BaseModel):
     completed: bool
     time_spent: int # minutes
 
+class DailyPlanRequest(BaseModel):
+    user_id: UUID
+    day: int
+    duration: int
+
 # --- Endpoints ---
 
 @router.post("/auth/onboard")
-async def onboard_user(request: OnboardingRequest):
-    # Simulated Supabase DB Insertion
-    return {"status": "success", "message": "Profile initialized with predictive baseline.", "data": request.dict()}
+async def onboard_user(request: ProfileCreate, db: AsyncSession = Depends(get_async_db)):
+    service = ProfileService(db)
+    try:
+        profile = await service.add_user_profile(request)
+        return {"success": True, "message": "Profile initialized with predictive baseline.", "data": profile}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/user/profile")
-async def get_profile(user_id: str):
-    # Simulated fetch from "users" table
-    return {
-        "id": user_id,
-        "name": "Tulasi User",
-        "role": "professional",
-        "experience": "3-5",
-        "current_role": "Software Engineer",
-        "target_role": "AI Architect",
-        "company": "Tech Corp",
-        "skills": ["JavaScript", "React", "Node.js"]
-    }
+async def get_profile(user_id: UUID, db: AsyncSession = Depends(get_async_db)):
+    service = ProfileService(db)
+    try:
+        profile = await service.get_user_profile(user_id)
+        return {"success": True, "data": profile}
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@router.get("/career/prediction")
+async def get_career_prediction(user_id: UUID, db: AsyncSession = Depends(get_async_db)):
+    service = CareerService(db)
+    try:
+        # For now we create a default request or fetch existing
+        request = CareerPredictionRequest(current_skills=[], interests=[], current_level="intermediate")
+        prediction = await service.predict_career(user_id, request)
+        return prediction
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/roadmap/student")
 async def get_student_roadmap(user_id: str):
@@ -58,33 +81,14 @@ async def get_student_roadmap(user_id: str):
         ]
     }
 
-@router.get("/roadmap/professional")
-async def get_professional_roadmap(user_id: str):
-    return {
-        "user_id": user_id,
-        "current_salary_band": "$125,000",
-        "predicted_growth": "+45%",
-        "tracks": [
-            {
-                "title": "AI/ML Engineer",
-                "salary_us": "$150K-$220K",
-                "salary_india": "₹30-60 LPA",
-                "growth": "+55%",
-                "skills": ["PyTorch", "LLM Fine-tuning", "Transformers"],
-                "fit": 88,
-                "timeline": "6-12 months"
-            },
-            {
-                "title": "Cloud Architect",
-                "salary_us": "$140K-$210K",
-                "salary_india": "₹28-55 LPA",
-                "growth": "+35%",
-                "skills": ["Kubernetes", "AWS Solutions", "Terraform"],
-                "fit": 75,
-                "timeline": "1-2 years"
-            }
-        ]
-    }
+@router.post("/roadmap/daily")
+async def get_daily_plan(request: DailyPlanRequest, db: AsyncSession = Depends(get_async_db)):
+    service = RoadmapService(db)
+    try:
+        plan = await service.get_daily_plan(request.user_id, request.day, request.duration)
+        return {"success": True, "data": plan}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/skills/recommend")
 async def recommend_skills(user_id: str):
@@ -112,6 +116,6 @@ async def get_notifications(user_id: str):
     ]
 
 @router.post("/progress/update")
-async def update_progress(update: ProgressUpdate):
-    # Simulated DB Update
+async def update_progress(update: ProgressUpdate, db: AsyncSession = Depends(get_async_db)):
+    # In a real scenario, this would call the StreakService
     return {"status": "success", "streak_updated": True, "data": update.dict()}

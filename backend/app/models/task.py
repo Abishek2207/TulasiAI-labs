@@ -14,6 +14,10 @@ class Task(Base):
     user_id = Column(UUID(as_uuid=True), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False, index=True)
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
+    concept = Column(Text, nullable=True)
+    real_world_application = Column(Text, nullable=True)
+    ai_tool_usage = Column(Text, nullable=True)
+    communication_task = Column(Text, nullable=True)
     task_type = Column(String(50), nullable=False, index=True)  # learning, project, practice, review, certification
     difficulty = Column(String(20), nullable=True)  # beginner, intermediate, advanced, expert
     estimated_hours = Column(DECIMAL(4, 2), default=1.00, nullable=False)
