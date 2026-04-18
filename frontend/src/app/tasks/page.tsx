@@ -38,6 +38,7 @@ export default function TasksPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!user) return
     
     try {
       const taskData = {
@@ -60,26 +61,28 @@ export default function TasksPage() {
       setShowAddForm(false)
       
       // Refresh tasks
-      fetchTasks(user!.id, filter === 'completed' ? true : filter === 'pending' ? false : undefined)
+      fetchTasks(user.id, filter === 'completed' ? true : filter === 'pending' ? false : undefined)
     } catch (error) {
       console.error('Failed to create task:', error)
     }
   }
 
   const handleComplete = async (taskId: string) => {
+    if (!user) return
     try {
       await completeTask(taskId, user.id)
-      fetchTasks(user!.id, filter === 'completed' ? true : filter === 'pending' ? false : undefined)
+      fetchTasks(user.id, filter === 'completed' ? true : filter === 'pending' ? false : undefined)
     } catch (error) {
       console.error('Failed to complete task:', error)
     }
   }
 
   const handleDelete = async (taskId: string) => {
+    if (!user) return
     if (confirm('Are you sure you want to delete this task?')) {
       try {
         await deleteTask(taskId, user.id)
-        fetchTasks(user!.id, filter === 'completed' ? true : filter === 'pending' ? false : undefined)
+        fetchTasks(user.id, filter === 'completed' ? true : filter === 'pending' ? false : undefined)
       } catch (error) {
         console.error('Failed to delete task:', error)
       }
@@ -87,9 +90,10 @@ export default function TasksPage() {
   }
 
   const handleGenerateDaily = async () => {
+    if (!user) return
     try {
       await generateDailyTasks(user.id, 2)
-      fetchTasks(user!.id, filter === 'completed' ? true : filter === 'pending' ? false : undefined)
+      fetchTasks(user.id, filter === 'completed' ? true : filter === 'pending' ? false : undefined)
     } catch (error) {
       console.error('Failed to generate daily tasks:', error)
     }

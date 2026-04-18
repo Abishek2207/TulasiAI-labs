@@ -169,7 +169,8 @@ export class AuthService {
 
   // Listen to auth changes
   onAuthChange(callback: (user: User | null) => void) {
-    return supabase.auth.onAuthStateChange(async (event, session) => {
+    if (!supabase) return () => {}
+    return supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         const userData = await this.getCurrentUser()
         callback(userData || null)
