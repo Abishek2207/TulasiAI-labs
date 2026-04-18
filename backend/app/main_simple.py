@@ -44,6 +44,16 @@ class CareerPredictRequest(BaseModel):
     current_skills: Optional[List[str]] = []
     interests: Optional[List[str]] = []
     current_level: Optional[str] = "intermediate"
+    role: Optional[str] = None
+    experience: Optional[str] = None
+    company: Optional[str] = None
+    goal: Optional[str] = None
+
+class DailyPlanRequest(BaseModel):
+    role: str
+    experience: str
+    day: int
+    duration: int  # 1, 2, or 3 hours
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -74,54 +84,59 @@ def generate_student_roadmap(daily_hours: int) -> dict:
     
     return {"days": days[:10], "total_days": 30}
 
-def generate_professional_insights(role: str, experience: str, skills: List[str]) -> dict:
-    """Generate AI career insights for professionals (rule-based)."""
+def generate_professional_insights(role: str, experience: str, skills: List[str], company: Optional[str] = None, goal: Optional[str] = None) -> dict:
+    """
+    Simulates the 'Master Prompt' execution for career strategy.
+    Returns structured results as requested in the vision.
+    """
+    # 1. Layoff Risk Calculation
+    has_ai_skills = any(s.lower() in ["ai", "ml", "llm", "generative ai", "openai"] for s in skills)
+    risk_level = "Low" if has_ai_skills else "Medium"
+    risk_reason = "Strong relevance in current market due to AI adoption." if has_ai_skills else "Lack of GenAI integration in current tech stack increases redundancy risk."
     
-    # Skill gap analysis
-    trending = ["Machine Learning", "Cloud Architecture", "Kubernetes", "GenAI", "DevOps", "Data Engineering"]
-    missing = [s for s in trending if s not in skills]
-    recommended = missing[:4] if missing else trending[:4]
-    
-    # Salary based on experience
-    salary_map = {
-        "0-1":  ("₹4-8 LPA",   "+45% in 2 years with upskilling"),
-        "1-3":  ("₹8-18 LPA",  "+35% in 18 months with cloud certs"),
-        "3-5":  ("₹18-32 LPA", "+30% in 12 months with leadership skills"),
-        "5-10": ("₹30-55 LPA", "+40% by transitioning to lead/architect"),
-        "10+":  ("₹50-80 LPA", "+25% by targeting FAANG or startups"),
-    }
-    current_salary, growth_path = salary_map.get(experience or "3-5", ("₹15-30 LPA", "+30% potential"))
-    
-    # Career path based on role + experience
-    if experience and experience in ["5-10", "10+"]:
-        career_path = "You're positioned for Senior Engineering, Tech Lead, or Engineering Manager roles. Focus on system design and team leadership."
-    elif experience and experience in ["3-5"]:
-        career_path = "Strong mid-career position. Cloud + AI skill additions will accelerate you to senior roles within 12-18 months."
-    else:
-        career_path = "Build a solid foundation with certifications. 1-3 years of consistent learning will open premium tech opportunities."
-    
-    # Action items
-    action_items = [
-        "Get AWS/GCP cloud certification (3-4 months, high ROI)",
-        "Build 2-3 GenAI projects and publish on GitHub",
-        f"Practice system design weekly (for {'lead' if experience in ['5-10','10+'] else 'senior'} level interviews)",
-        "Contribute to open source to build industry credibility",
-        "Apply strategically to FAANG or top product companies"
-    ]
-    
+    if company and company.lower() in ["google", "meta", "amazon", "microsoft"]:
+        risk_level = "Low"
+        risk_reason = "Stable tier-1 placement, but continuous skill evolution is expected."
+
+    # 2. Market Demand Score
+    demand_score = 85 if has_ai_skills else 65
+
+    # 3. Skill Gap Analysis
+    trending = ["LLM Orchestration", "System Design", "Cloud Native (K8s)", "Vector Databases", "Prompt Engineering"]
+    skill_gaps = [s for s in trending if s not in skills][:5]
+
+    # 4. Salary Growth Strategy (₹ LPA)
+    base_salaries = {"0-1": 6, "1-3": 12, "3-5": 22, "5-10": 40, "10+": 65}
+    current_est = base_salaries.get(experience, 22)
+    target_est = current_est * 1.5
+
     return {
-        "recommended_skills": recommended,
-        "career_path": career_path,
-        "salary_growth": f"{current_salary} → {growth_path}",
-        "summary": f"Your profile shows strong potential. With {experience or '3-5'} years of experience in {role or 'tech'}, you are well-positioned for growth. Adding AI/ML and cloud skills will maximize your market value in 2025.",
-        "action_items": action_items,
-        "market_trends": {
-            "hot_skills": [
-                {"skill": "Generative AI / LLMs", "growth": "+78%", "demand": "Very High"},
-                {"skill": "Cloud Architecture", "growth": "+45%", "demand": "Very High"},
-                {"skill": "Kubernetes / DevOps", "growth": "+38%", "demand": "High"},
-            ]
-        }
+        "layoff_risk": {"level": risk_level, "reason": risk_reason},
+        "market_demand_score": demand_score,
+        "skill_gaps": skill_gaps,
+        "recommended_path": f"Focus on transitioning to {goal or 'Senior/Lead'} role by mastering distributed systems and AI integration within 6 months.",
+        "salary_growth_strategy": f"Your target compensation: ₹{current_est}L → ₹{target_est}L. Strategy: Switch to product-heavy startups or FAANG with specialized AI certifications.",
+        "ai_skills_to_learn": ["Claude/OpenAI APIs", "LangChain", "Vector DBs (Pinecone/Weaviate)"],
+        "daily_learning_plan_preview": [
+            {"day": 1, "topic": "AI-Agentic Workflows"},
+            {"day": 2, "topic": "Retrieval Augmented Generation (RAG)"},
+            {"day": 3, "topic": "Fine-tuning Foundations"}
+        ]
+    }
+
+def generate_daily_plan_content(day: int, role: str, experience: str, duration: int) -> dict:
+    """
+    Simulates the 'Daily Plan Generator' prompt.
+    """
+    return {
+        "day": day,
+        "role": role,
+        "duration": f"{duration} hours",
+        "concept": "Adaptive Scaling in Distributed Systems." if day == 1 else "Optimizing LLM inference costs.",
+        "task": "Implement a load balancer that prioritizes critical traffic." if day == 1 else "Benchmark various LLM endpoints for latency.",
+        "real_world_application": "Handling million-user traffic bursts during black friday sales." if day == 1 else "Reducing API costs for a customer support chatbot.",
+        "ai_tool_usage": "Use GPT-4 to generate terraform scripts and check for security flaws.",
+        "communication_task": "Write a weekly sync email to Stakeholders explaining the scaling improvements." if day == 1 else "Explain LLM latency vs cost tradeoffs to the Product Manager."
     }
 
 # ─── Health Endpoints ───────────────────────────────────────────────────────
@@ -166,7 +181,9 @@ async def generate_roadmap(request: RoadmapRequest):
             insights = generate_professional_insights(
                 role=request.current_role or "",
                 experience=request.experience or "3-5",
-                skills=request.skills or []
+                skills=request.skills or [],
+                company=request.company,
+                goal=None # Can be added to request schema if needed
             )
             return JSONResponse({
                 "success": True,
@@ -180,6 +197,25 @@ async def generate_roadmap(request: RoadmapRequest):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+
+@app.post("/generate-daily-plan")
+async def generate_daily_plan(request: DailyPlanRequest):
+    """
+    Endpoint for the Daily Adaptive Path generator.
+    """
+    try:
+        plan = generate_daily_plan_content(
+            day=request.day,
+            role=request.role,
+            experience=request.experience,
+            duration=request.duration
+        )
+        return JSONResponse({
+            "success": True,
+            "data": plan
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ─── Legacy Mock Endpoints (backwards compatibility) ────────────────────────

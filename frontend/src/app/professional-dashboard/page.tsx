@@ -38,12 +38,43 @@ const TRENDING = [
   { skill: 'Data Engineering', demand: 'high', growth: 42, category: 'Data' }
 ]
 
+const DAILY_PLAN = [
+  {
+    day: 1,
+    title: "AI-Augmented Architecture",
+    concept: "Traditional Microservices vs. AI-Agentic Orchestration",
+    task: "Design a system diagram for a self-healing service.",
+    miniProject: "Build a basic LLM wrapper that monitors logs and suggests fixes.",
+    aiTool: "Utilize Cursor/Claude-3.5-Sonnet for boilerplate and V0 for UI.",
+    softSkill: "Explain your AI-first architecture in 2 lines for a non-technical manager."
+  },
+  {
+    day: 2,
+    title: "Prompt Engineering for Engineering Managers",
+    concept: "Chain-of-Thought vs. Few-Shot Prompting in Code Reviews",
+    task: "Create a system prompt that audits PRs for security vulnerabilities.",
+    miniProject: "CLI tool that takes a Git Diff and returns a risk score.",
+    aiTool: "OpenAI Playground / Anthropic Console for prompt testing.",
+    softSkill: "Write a professional email explaining why a 'manual' QA process is now redundant."
+  },
+  {
+    day: 3,
+    title: "Cloud Infrastructure as Code (AI-Assisted)",
+    concept: "Terraform/Pulumi optimization using GenAI",
+    task: "Generate a production-ready AWS VPC config using AI prompts.",
+    miniProject: "Automated cost-optimization script using AI analysis of billing CSV.",
+    aiTool: "AWS SageMaker / Bedrock for infrastructure monitoring.",
+    softSkill: "Handle a workplace conversation where a colleague feels threatened by AI automation."
+  }
+]
+
 const CAREER_PATHS = [
   {
     title: 'Senior Software Engineer',
     salaryIndia: '₹18-35 LPA',
     salaryUS: '$120K-$180K',
     growth: '+25%',
+    risk: 12,
     skills: ['System Design', 'Leadership', 'Architecture'],
     fit: 92,
     timeline: '1-2 years'
@@ -53,27 +84,30 @@ const CAREER_PATHS = [
     salaryIndia: '₹30-60 LPA',
     salaryUS: '$150K-$220K',
     growth: '+35%',
+    risk: 5,
     skills: ['Management', 'Communication', 'Strategy'],
     fit: 75,
     timeline: '2-3 years'
-  },
-  {
-    title: 'AI/ML Engineer',
-    salaryIndia: '₹20-45 LPA',
-    salaryUS: '$130K-$200K',
-    growth: '+55%',
-    skills: ['Python', 'TensorFlow', 'MLOps'],
-    fit: 68,
-    timeline: '6-12 months'
   }
 ]
 
 export default function ProfessionalDashboard() {
   const [showUS, setShowUS] = useState(false)
+  const [activeDay, setActiveDay] = useState(1)
   const currentSalary = 125000 
   
   return (
-    <div className="min-h-screen bg-[var(--background)] text-white font-sans pb-20">
+    <div className="min-h-screen bg-[var(--background)] text-white font-sans pb-20 overflow-x-hidden">
+      
+      {/* Live Market Ticker */}
+      <div className="h-10 bg-black/50 backdrop-blur-md border-b border-white/5 flex items-center overflow-hidden whitespace-nowrap z-[100] fixed top-16 w-full">
+        <div className="flex animate-marquee gap-12 text-xs font-mono text-white/40">
+          <span className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-red-500 animate-pulse" /> Manual QA jobs decreasing in Bengaluru (-12%)</span>
+          <span className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" /> React AI tools demand up 78% this quarter</span>
+          <span className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-blue-500 animate-pulse" /> AWS Bedrock certifications boosting packages by ₹4.5L Avg</span>
+          <span className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-orange-500 animate-pulse" /> Mid-career risk high for Non-AI Architects</span>
+        </div>
+      </div>
       <Navbar />
 
       <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-24">
@@ -162,42 +196,69 @@ export default function ProfessionalDashboard() {
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                <Target className="w-6 h-6 text-primary" /> Career Acceleration Paths
-              </h2>
-              <div className="grid md:grid-cols-2 gap-4">
-                {CAREER_PATHS.slice(0, 2).map((path, idx) => (
-                  <div key={idx} className="glass glass-hover rounded-[1.5rem] p-6 border border-white/5 relative overflow-hidden group">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <div className="text-xs font-semibold text-primary mb-2 flex items-center">
-                          <CheckCircle2 className="w-3 h-3 mr-1" /> {path.fit}% Skill Match
-                        </div>
-                        <h3 className="text-xl font-bold">{path.title}</h3>
-                      </div>
-                      <div className="bg-white/5 p-2 rounded-xl border border-white/5">
-                        <Briefcase className="w-5 h-5 text-white/50 group-hover:text-white transition-colors" />
-                      </div>
-                    </div>
-                    
-                    <div className="text-2xl font-mono mb-4 text-white/90">
-                      {showUS ? path.salaryUS : path.salaryIndia}
-                    </div>
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-2xl font-bold flex items-center gap-3">
+                  <Zap className="w-6 h-6 text-[var(--accent-orange)]" /> Daily Adaptive Path
+                </h2>
+                <div className="flex gap-2 bg-white/5 p-1 rounded-xl border border-white/5">
+                  {[1, 2, 3, 4, 5, 6, 7].map(d => (
+                    <button 
+                      key={d}
+                      onClick={() => setActiveDay(d)}
+                      className={`w-10 h-10 rounded-lg text-sm font-semibold transition-all ${activeDay === d ? "bg-white text-black" : "text-white/40 hover:bg-white/10"}`}
+                    >
+                      D{d}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      {path.skills.map(s => (
-                        <span key={s} className="text-xs bg-white/5 px-2 py-1 rounded-md border border-white/10 text-white/70">{s}</span>
-                      ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="glass rounded-[2rem] p-8 border border-white/10 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-8">
+                    <div className="w-16 h-16 rounded-full border-4 border-white/5 border-t-primary animate-spin" style={{ animationDuration: '3s' }} />
+                  </div>
+                  <h4 className="text-primary font-bold uppercase tracking-widest text-xs mb-4">Focus of the Day</h4>
+                  <h3 className="text-3xl font-bold mb-6">{DAILY_PLAN.find(p => p.day === activeDay)?.title || "Advanced AI Integration"}</h3>
+                  
+                  <div className="space-y-6">
+                    <div>
+                      <h5 className="text-white/50 text-xs font-semibold uppercase mb-2">Concept</h5>
+                      <p className="font-light text-white/80">{DAILY_PLAN.find(p => p.day === activeDay)?.concept || "System Scale with LLMs"}</p>
                     </div>
-
-                    <div className="flex items-center justify-between mt-auto">
-                      <span className="text-sm text-white/40 flex items-center"><Clock className="w-4 h-4 mr-1" /> {path.timeline} transition</span>
-                      <button className="text-sm font-semibold text-white/50 group-hover:text-white transition-colors flex items-center">
-                        View Gap <ArrowRight className="w-4 h-4 ml-1" />
-                      </button>
+                    <div>
+                      <h5 className="text-white/50 text-xs font-semibold uppercase mb-2">Hands-on Task</h5>
+                      <p className="font-light text-white/80">{DAILY_PLAN.find(p => p.day === activeDay)?.task || "Update schema for RAG"}</p>
+                    </div>
+                    <div className="pt-4 flex gap-4">
+                      <button className="flex-1 bg-white text-black py-3 rounded-xl font-bold text-sm hover:scale-[1.02] transition-all">Start Project</button>
+                      <button className="w-12 h-12 glass rounded-xl flex items-center justify-center border border-white/10 hover:bg-white/5"><Terminal className="w-5 h-5" /></button>
                     </div>
                   </div>
-                ))}
+                </div>
+
+                <div className="flex flex-col gap-4">
+                   <div className="glass p-6 rounded-[1.5rem] border border-white/5">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-8 h-8 rounded-lg bg-[var(--accent-blue)]/20 flex items-center justify-center">
+                          <Globe className="w-4 h-4 text-[var(--accent-blue)]" />
+                        </div>
+                        <h4 className="font-bold text-sm">Communication Task</h4>
+                      </div>
+                      <p className="text-sm text-white/60 font-light italic mb-4">"{DAILY_PLAN.find(p => p.day === activeDay)?.softSkill}"</p>
+                      <button className="text-xs font-bold text-primary flex items-center gap-1">Open Editor <ChevronRight className="w-4 h-4" /></button>
+                   </div>
+                   
+                   <div className="glass p-6 rounded-[1.5rem] border border-white/5">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-8 h-8 rounded-lg bg-[var(--accent-green)]/20 flex items-center justify-center">
+                          <Sparkles className="w-4 h-4 text-[var(--accent-green)]" />
+                        </div>
+                        <h4 className="font-bold text-sm">AI Leverage</h4>
+                      </div>
+                      <p className="text-sm text-white/60 font-light">{DAILY_PLAN.find(p => p.day === activeDay)?.aiTool}</p>
+                   </div>
+                </div>
               </div>
             </motion.div>
 
@@ -207,24 +268,41 @@ export default function ProfessionalDashboard() {
             
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="deep-blur rounded-[2rem] p-6 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-[60px] translate-x-1/2 -translate-y-1/2" />
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-white" />
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">AI Architect</h3>
+                    <p className="text-xs text-white/50">Risk Analysis Engine</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold">AI Architect</h3>
-                  <p className="text-xs text-white/50">Live Intelligence</p>
+                <div className="flex flex-col items-end">
+                   <div className="text-2xl font-bold text-red-400">High</div>
+                   <div className="text-[10px] text-white/40 uppercase tracking-tighter">Current Risk Level</div>
                 </div>
               </div>
 
-              <div className="bg-black/40 rounded-2xl p-4 border border-white/5 mb-4">
+              <div className="relative h-4 bg-white/5 rounded-full overflow-hidden mb-6 border border-white/5">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: '75%' }}
+                  className="h-full bg-gradient-to-r from-orange-500 to-red-500"
+                />
+                <div className="absolute inset-0 flex justify-around items-center px-4">
+                  {[1,2,3,4,5].map(i => <div key={i} className="w-px h-1 bg-white/20" />)}
+                </div>
+              </div>
+
+              <div className="bg-white/5 rounded-2xl p-5 border border-white/5 mb-6">
                 <p className="text-sm text-white/80 leading-relaxed font-light">
-                  <span className="text-red-400 font-semibold">Layoff Risk Alert:</span> Your current stack lacks Generative AI integration, which increases redundancy risk. 
-                  Mastering <strong className="text-white">AI Tools & LLMs</strong> could drop your layoff risk to <strong className="text-[var(--accent-green)]">near 0%</strong> and secure a premium band.
+                  <span className="text-red-400 font-semibold block mb-1">Reason for High Risk:</span>
+                  Your role has <span className="text-white font-medium">85% overlap</span> with current LLM capabilities and you lack cloud-native microservices exposure.
                 </p>
               </div>
-              <button className="w-full bg-red-500/10 text-red-400 border border-red-500/20 py-3 rounded-full text-sm font-semibold hover:bg-red-500/20 transition-all flex items-center justify-center">
-                Activate AI Skill Protector
+              <button className="w-full bg-red-500/10 text-red-400 border border-red-500/20 py-4 rounded-xl text-sm font-bold hover:bg-red-500/20 transition-all flex items-center justify-center gap-2 group">
+                <Activity className="w-4 h-4 group-hover:scale-110 transition-transform" /> Activate AI Skill Protector
               </button>
             </motion.div>
 

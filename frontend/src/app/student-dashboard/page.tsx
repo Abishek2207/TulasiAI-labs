@@ -32,23 +32,17 @@ interface RoadmapDay {
   locked: boolean
 }
 
-const ROADMAP: RoadmapDay[] = [
-  {
-    day: 1, title: 'Foundation & Basics', progress: 100, locked: false,
-    topics: { DSA: ['Arrays', 'Time O(n)'], Aptitude: ['Number Systems'], Core: ['OOPs'] }
-  },
-  {
-    day: 2, title: 'Arrays & Strings', progress: 45, locked: false,
-    topics: { DSA: ['Two Pointers', 'Sliding Window'], Aptitude: ['Ratio & Proportion'], Core: ['Control Structures'] }
-  },
-  {
-    day: 3, title: 'Linked Lists', progress: 0, locked: true,
-    topics: { DSA: ['Singly Linked List'], Aptitude: ['Profit & Loss'], Core: ['Exception Handling'] }
-  },
-  {
-    day: 4, title: 'Stacks & Queues', progress: 0, locked: true,
-    topics: { DSA: ['Stack Operations'], Aptitude: ['Compound Interest'], Core: ['Memory Management'] }
-  }
+const TRACKS = [
+  { id: 'aptitude', title: 'Aptitude & Verbal', icon: '🧠', progress: 45, color: 'var(--accent-orange)', description: 'Master number systems, probability, and logical puzzles.' },
+  { id: 'coding', title: 'Coding & DSA', icon: '💻', progress: 68, color: 'var(--accent-blue)', description: 'Data structures, algorithms, and 500+ placement problems.' },
+  { id: 'interview', title: 'Interview Mastery', icon: '🎙️', progress: 12, color: 'var(--primary)', description: 'Mock interviews, body language, and behavioral prep.' },
+  { id: 'english', title: 'English & Comm', icon: '🌍', progress: 30, color: 'var(--accent-green)', description: 'Workplace English, presentation skills, and fluency.' }
+]
+
+const DAILY_TASKS = [
+  { id: 1, track: 'coding', title: 'Solve 2 Sum (HashMap)', time: '45m', type: 'coding' },
+  { id: 2, track: 'aptitude', title: 'Permutations & Combinations', time: '30m', type: 'practice' },
+  { id: 3, track: 'english', title: 'Record 1-min Self Intro', time: '15m', type: 'soft-skills' }
 ]
 
 const CircularProgress = ({ progress, size = 60, strokeWidth = 4, color = "var(--primary)" }: any) => {
@@ -160,57 +154,58 @@ export default function StudentDashboard() {
           
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold tracking-tight">Your Adaptive Path</h2>
-              <span className="text-sm font-medium text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20">Phase 1: Foundations</span>
+              <h2 className="text-2xl font-bold tracking-tight">Placement OS Tracks</h2>
+              <span className="text-sm font-medium text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20">Active Session: Week 4</span>
             </div>
 
-            <div className="relative">
-              <div className="absolute left-[38px] top-10 bottom-10 w-0.5 bg-white/5" />
-              
-              <div className="flex flex-col gap-6">
-                {ROADMAP.map((day, idx) => (
-                  <motion.div 
-                    key={day.day}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.1 }}
-                    className={"relative z-10 flex gap-6 glass rounded-[2rem] p-6 glass-hover " + (day.locked ? "opacity-50 grayscale" : "")}
-                  >
-                    <div className="flex-shrink-0 bg-[var(--card)] rounded-full self-start">
-                      <CircularProgress 
-                        progress={day.progress} 
-                        size={80} 
-                        strokeWidth={6} 
-                        color={day.progress === 100 ? "var(--accent-green)" : "var(--accent-orange)"} 
-                      />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+              {TRACKS.map((track, idx) => (
+                <motion.div 
+                  key={track.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="glass glass-hover rounded-[2rem] p-6 flex items-center justify-between group cursor-pointer"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="text-4xl">{track.icon}</div>
+                    <div>
+                      <h3 className="font-bold text-lg">{track.title}</h3>
+                      <p className="text-xs text-white/40 line-clamp-1">{track.description}</p>
                     </div>
-                    
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-xl font-bold flex items-center gap-2">
-                          Day {day.day}: {day.title}
-                          {day.locked && <Lock className="w-4 h-4 ml-2 opacity-50" />}
-                        </h3>
-                      </div>
-                      
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {day.topics.DSA.map(t => (
-                          <span key={t} className="text-xs font-medium bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] px-2.5 py-1 rounded-full border border-[var(--accent-blue)]/20">DSA: {t}</span>
-                        ))}
-                        {day.topics.Aptitude.map(t => (
-                          <span key={t} className="text-xs font-medium bg-purple-500/10 text-purple-400 px-2.5 py-1 rounded-full border border-purple-500/20">Apt: {t}</span>
-                        ))}
-                      </div>
+                  </div>
+                  <CircularProgress progress={track.progress} size={50} strokeWidth={4} color={track.color} />
+                </motion.div>
+              ))}
+            </div>
 
-                      {!day.locked && day.progress < 100 && (
-                        <button className="mt-6 bg-white text-black px-6 py-2 rounded-full text-sm font-semibold hover:scale-105 transition-transform flex items-center gap-2">
-                          Start Session <ArrowRight className="w-4 h-4" />
-                        </button>
-                      )}
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold tracking-tight">Today's Drill</h2>
+            </div>
+            
+            <div className="space-y-4">
+              {DAILY_TASKS.map((task, idx) => (
+                <motion.div 
+                  key={task.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 + (idx * 0.1) }}
+                  className="glass flex items-center justify-between p-4 px-8 rounded-2xl border border-white/5 hover:border-white/20 transition-all group"
+                >
+                  <div className="flex items-center gap-6">
+                    <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-xs font-mono group-hover:bg-primary group-hover:text-white transition-all">
+                      {idx + 1}
                     </div>
-                  </motion.div>
-                ))}
-              </div>
+                    <div>
+                      <h4 className="font-bold">{task.title}</h4>
+                      <p className="text-xs text-white/40 uppercase tracking-widest">{task.track} • {task.time}</p>
+                    </div>
+                  </div>
+                  <button className="p-2 rounded-full glass hover:bg-white text-white hover:text-black transition-all">
+                    <Play className="w-4 h-4 fill-current" />
+                  </button>
+                </motion.div>
+              ))}
             </div>
           </div>
 

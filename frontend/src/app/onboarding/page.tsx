@@ -53,9 +53,29 @@ const QUESTIONS = [
   },
   {
     id: 'current_skills',
-    title: "List a few of your top technical skills right now.",
+    title: "What is your primary tech stack? (Comma separated)",
     isInput: true,
-    placeholder: "e.g., React, Python, AWS, SQL",
+    placeholder: "e.g., React, Node.js, AWS, Postgres",
+    condition: (state: any) => state.path === 'professional'
+  },
+  {
+    id: 'salary_range',
+    title: "What is your current salary range? (Optional)",
+    options: [
+      { label: "₹4 - ₹8 LPA", value: "4-8" },
+      { label: "₹8 - ₹15 LPA", value: "8-15" },
+      { label: "₹15 - ₹30 LPA", value: "15-30" },
+      { label: "₹30 - ₹50 LPA", value: "30-50" },
+      { label: "₹50+ LPA", value: "50+" },
+      { label: "Prefer not to say", value: "hidden" }
+    ],
+    condition: (state: any) => state.path === 'professional'
+  },
+  {
+    id: 'career_goal',
+    title: "What is your ultimate career goal for the next 12 months?",
+    isInput: true,
+    placeholder: "e.g., Senior Architect at Google, Full Stack Transition",
     condition: (state: any) => state.path === 'professional'
   }
 ]
@@ -101,7 +121,18 @@ export default function OnboardingPage() {
       if (supabase) {
         const { error } = await supabase
           .from('profiles')
-          .update({ user_type: userType })
+          .update({ 
+            user_type: userType,
+            current_role: finalAnswers.current_role,
+            company: finalAnswers.organization,
+            industry: finalAnswers.industry,
+            experience_level: finalAnswers.experience === "0-1" ? "beginner" : 
+                            finalAnswers.experience === "1-3" ? "intermediate" : 
+                            finalAnswers.experience === "3-5" ? "advanced" : "expert",
+            salary_range: finalAnswers.salary_range,
+            career_goal: finalAnswers.career_goal,
+            target_role: finalAnswers.career_goal
+          })
           .eq('user_id', user.id)
         
         if (error && !error.message.includes('not configured')) {
