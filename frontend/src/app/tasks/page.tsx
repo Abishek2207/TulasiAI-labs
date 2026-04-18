@@ -398,7 +398,7 @@ export default function TasksPage() {
                             <span className={`px-2 py-1 text-xs rounded-full ${getPriorityColor(task.priority)}`}>
                               {task.priority}
                             </span>
-                            <span className={`px-2 py-1 text-xs rounded-full ${getDifficultyColor(task.difficulty)} bg-gradient-to-r text-white`}>
+                            <span className={`px-2 py-1 text-xs rounded-full ${getDifficultyColor(task.difficulty || 'beginner')} bg-gradient-to-r text-white`}>
                               {task.difficulty}
                             </span>
                           </div>
@@ -407,7 +407,7 @@ export default function TasksPage() {
                           )}
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
                             <div className="flex items-center gap-1">
-                              {React.createElement(getTaskIcon(task.task_type), { className: 'w-4 h-4' })}
+                              {React.createElement(getTaskIcon(task.task_type || 'learning'), { className: 'w-4 h-4' })}
                               <span className="capitalize">{task.task_type}</span>
                             </div>
                             <div className="flex items-center gap-1">
